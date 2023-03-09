@@ -1,28 +1,35 @@
-FROM alpine:3.17.1
+FROM alpine:3.17
 
 ARG HAPROXY_MODSEC_REF=3c895f3e7dd291dba19d57ba054b277e6fb80ca4
 ARG HAPROXY_MODSEC_SHA256=645ff6fd6fe1394462bd6b82ee5430606c631b83021f8b5cd7eca2b62b427970
-ARG MODSEC_VERSION=2.9.6
-ARG MODSEC_SHA256=626a831aca92cdff73ea68a85b7f5c105d9a15365fa270fbed3139a81eaf3344
+ARG MODSEC_VERSION=2.9.7
+ARG MODSEC_SHA256=2a28fcfccfef21581486f98d8d5fe0397499749b8380f60ec7bb1c08478e1839
 
 ADD spoa-log.patch /
 
 RUN apk upgrade --no-cache \
- && apk add --no-cache --virtual .build-modsecurity \
-        curl \
-        openssl \
-        patch \
-        tar \
-        make \
-        gcc \
-        libc-dev \
-        linux-headers \
-        apache2-dev \
-        pcre-dev \
-        libxml2-dev \
-        libevent-dev \
-        curl-dev \
-        yajl-dev \
+    && apk add --no-cache --virtual .build-modsecurity \
+    apache2-dev \
+    apr \
+    apr-dev \
+    build-base \
+    curl \
+    curl-dev \
+    file \
+    gcc \
+    libc-dev \
+    libcurl \
+    libevent-dev \
+    libxml2-dev \
+    linux-headers \
+    lua5.4 \
+    lua5.4-dev \
+    make \
+    openssl \
+    patch \
+    pcre-dev \
+    tar \
+    yajl-dev \
     && curl -fsSLo /tmp/modsecurity.tar.gz https://github.com/SpiderLabs/ModSecurity/releases/download/v${MODSEC_VERSION}/modsecurity-${MODSEC_VERSION}.tar.gz \
     && curl -fsSLo /tmp/haproxy-modsecurity.zip https://github.com/haproxy/spoa-modsecurity/archive/${HAPROXY_MODSEC_REF}.zip \
     && echo "$MODSEC_SHA256  /tmp/modsecurity.tar.gz" | sha256sum -c \
@@ -38,9 +45,10 @@ RUN apk upgrade --no-cache \
     && ./configure \
         --prefix=/usr/src/modsecurity/INSTALL \
         --disable-apache2-module \
+        --disable-dependency-tracking \
         --enable-standalone-module \
         --enable-pcre-study \
-        --without-lua \
+        --with-lua=yes \
         --enable-pcre-jit \
     && make -C standalone install \
     && mkdir -p INSTALL/include \
@@ -58,7 +66,8 @@ RUN apk upgrade --no-cache \
             | tr ',' '\n' | sed 's/^/so:/' \
     ) \
     && apk add --no-cache $deps tini \
-    && apk del --no-cache .build-modsecurity
+    && apk del --no-cache .build-modsecurity \
+    && rm -rf /var/cache/apk/*
 
 ARG OWASP_MODSEC_VERSION=v3.3.4
 ARG OWASP_MODSEC_SHA256=15a84aaa041aa532905a34546b613bd3aed122e3f9814fbb5c28e1655d02b74d
