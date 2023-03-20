@@ -65,7 +65,7 @@ RUN apk upgrade --no-cache \
         scanelf --needed --nobanner --format '%n#p' /usr/local/bin/modsecurity \
             | tr ',' '\n' | sed 's/^/so:/' \
         ) \
-    && apk add --no-cache $deps lua5.4 tini \
+    && apk add --no-cache $deps bash curl lua5.4 tini \
     && apk del --no-cache .build-modsecurity \
     && rm -rf /var/cache/apk/*
 
