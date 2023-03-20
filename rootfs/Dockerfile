@@ -9,27 +9,27 @@ ADD spoa-log.patch /
 
 RUN apk upgrade --no-cache \
     && apk add --no-cache --virtual .build-modsecurity \
-    apache2-dev \
-    apr \
-    apr-dev \
-    build-base \
-    curl \
-    curl-dev \
-    file \
-    gcc \
-    libc-dev \
-    libcurl \
-    libevent-dev \
-    libxml2-dev \
-    linux-headers \
-    lua5.4 \
-    lua5.4-dev \
-    make \
-    openssl \
-    patch \
-    pcre-dev \
-    tar \
-    yajl-dev \
+        apache2-dev \
+        apr \
+        apr-dev \
+        build-base \
+        curl \
+        curl-dev \
+        file \
+        gcc \
+        libc-dev \
+        libcurl \
+        libevent-dev \
+        libxml2-dev \
+        linux-headers \
+        lua5.4 \
+        lua5.4-dev \
+        make \
+        openssl \
+        patch \
+        pcre-dev \
+        tar \
+        yajl-dev \
     && curl -fsSLo /tmp/modsecurity.tar.gz https://github.com/SpiderLabs/ModSecurity/releases/download/v${MODSEC_VERSION}/modsecurity-${MODSEC_VERSION}.tar.gz \
     && curl -fsSLo /tmp/haproxy-modsecurity.zip https://github.com/haproxy/spoa-modsecurity/archive/${HAPROXY_MODSEC_REF}.zip \
     && echo "$MODSEC_SHA256  /tmp/modsecurity.tar.gz" | sha256sum -c \
@@ -64,8 +64,8 @@ RUN apk upgrade --no-cache \
     && deps=$( \
         scanelf --needed --nobanner --format '%n#p' /usr/local/bin/modsecurity \
             | tr ',' '\n' | sed 's/^/so:/' \
-    ) \
-    && apk add --no-cache $deps tini \
+        ) \
+    && apk add --no-cache $deps lua5.4 tini \
     && apk del --no-cache .build-modsecurity \
     && rm -rf /var/cache/apk/*
 
